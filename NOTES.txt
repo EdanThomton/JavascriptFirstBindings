@@ -1,0 +1,23 @@
+#### Notes for future reference:
+
+## BUILD_TOOLCHAIN ##:
+|> using SSH/SFTP
+1> SSH as LVUSER: /usr/local/frc/bin/frcKillRobot.sh -t
+2> SFTP as LVUSER: update /home/lvuser/robotCommand to be `/path/to/node /home/lvuser/javascript/Robot.js`
+3> SFTP as LVUSER: update /home/lvuser/node_modules/ to hold HAL bindings/modules
+4> SFTP as LVUSER: update /home/lvuser/javascript/ to contain JS scripts
+5> SSH as LVUSER: /usr/local/frc/bin/frcKillRobot.sh -t -r
+
+## ROBORIO GENERATED FILEPATH ##:
+/home/lvuser/
+├ /node/
+│ └ this is where Node.JS will live (full filepath)
+├ /node_modules/
+│ ├ /HAL_bindings/
+│ │ └ this is where the compiled HAL .node bindings will live
+│ └ JSFirst.js
+├ /javascript/
+│ └ this is where user code will live
+├ /deploy/
+│ └ this is where non-JS files will live
+└ /robotCommand
