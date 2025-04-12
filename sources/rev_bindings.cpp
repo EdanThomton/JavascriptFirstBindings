@@ -22,7 +22,17 @@ void throw_range_err(Isolate* isolate, const char* err) {
         )
     );
 }
+class _binding_SparkBase : public node::ObjectWrap {
 
+    protected:
+        rev::spark::SparkBase* spark_base_ptr = NULL;
+
+    public:
+        rev::spark::SparkBase* get_spark_base() {
+            return spark_base_ptr;
+        };
+
+};
 class _binding_SparkBaseConfig : public node::ObjectWrap {
     private:
         rev::spark::SparkBaseConfig* config;
@@ -274,18 +284,6 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             NODE_SET_PROTOTYPE_METHOD(tpl, "disable_follower_mode", disable_follower_mode);
 
         }
-};
-
-class _binding_SparkBase : public node::ObjectWrap {
-
-    protected:
-        rev::spark::SparkBase* spark_base_ptr = NULL;
-
-    public:
-        rev::spark::SparkBase* get_spark_base() {
-            return spark_base_ptr;
-        };
-
 };
 class _binding_SparkMax : public _binding_SparkBase {
 
