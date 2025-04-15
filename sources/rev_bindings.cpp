@@ -76,7 +76,7 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
                 );
             rev::spark::SparkBaseConfig* cfg = arg0->get_config();
 
-            config->Apply(*cfg);
+            config = &config->Apply(*cfg);
 
             args.GetReturnValue().Set(args.This());
         }
