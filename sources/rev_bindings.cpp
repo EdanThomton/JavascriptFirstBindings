@@ -466,6 +466,22 @@ class _binding_SparkMax : public _binding_SparkBase {
     public:
         static void Init(Local<Object> exports) {
 
+            Isolate* isolate = exports->GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            Local<ObjectTemplate> addon_data_tpl = ObjectTemplate::New(isolate);
+            addon_data_tpl->SetInternalFieldCount(1);
+            Local<Object> addon_data = addon_data_tpl->NewInstance(context).ToLocalChecked();
+
+            Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate, New, addon_data);
+            tpl->SetClassName(String::NewFromUtf8(isolate, "SparkMax").ToLocalChecked());
+            tpl->InstanceTemplate()->SetInternalFieldCount(10);
+
+            NODE_SET_PROTOTYPE_METHOD(tpl, "configure", configure);
+            NODE_SET_PROTOTYPE_METHOD(tpl, "set", set);
+            NODE_SET_PROTOTYPE_METHOD(tpl, "set_voltage", set_voltage);
+            NODE_SET_PROTOTYPE_METHOD(tpl, "get", get);
+
         }
 
 };
