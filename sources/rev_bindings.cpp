@@ -48,7 +48,7 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             Isolate* isolate = args.GetIsolate();
             Local<Context> context = isolate->GetCurrentContext();
 
-            if(args.Length() > 0) {
+            if(args.Length() != 0) {
                 throw_type_err(isolate, "SparkBaseConfig does not take arguments!");
             }
 
@@ -59,6 +59,27 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             args.GetReturnValue().Set(args.This());
         }
 
+        static void apply(const FunctionCallbackInfo<Value>& args) {
+            Isolate* isolate = args.GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            if(args.Length() != 1) {
+                throw_type_err(isolate, "SparkBaseConfig::apply requires one argument!");
+            }
+
+            _binding_SparkBaseConfig* this_obj = ObjectWrap::Unwrap<_binding_SparkBaseConfig>(args.This());
+            rev::spark::SparkBaseConfig* config = this_obj->config;
+
+            _binding_SparkBaseConfig* arg0 = 
+                node::ObjectWrap::Unwrap<_binding_SparkBaseConfig>(
+                    args[0]->ToObject(context).ToLocalChecked()
+                );
+            rev::spark::SparkBaseConfig* cfg = arg0->get_config();
+
+            config->Apply(*cfg);
+
+            args.GetReturnValue().Set(args.This());
+        }
         static void set_idle_mode(const FunctionCallbackInfo<Value>& args) {
             Isolate* isolate = args.GetIsolate();
             Local<Context> context = isolate->GetCurrentContext();
@@ -272,6 +293,7 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             tpl->SetClassName(String::NewFromUtf8(isolate, "SparkConfig").ToLocalChecked());
             tpl->InstanceTemplate()->SetInternalFieldCount(10);
 
+            NODE_SET_PROTOTYPE_METHOD(tpl, "apply", apply);
             NODE_SET_PROTOTYPE_METHOD(tpl, "set_idle_mode", set_idle_mode);
             NODE_SET_PROTOTYPE_METHOD(tpl, "inverted", inverted);
             NODE_SET_PROTOTYPE_METHOD(tpl, "smart_current_limit", smart_current_limit);
