@@ -259,8 +259,8 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             args.GetReturnValue().Set(args.This());
         }
 
+    public:
         static void Init(Local<Object> exports) {
-
             Isolate* isolate = exports->GetIsolate();
             Local<Context> context = isolate->GetCurrentContext();
 
@@ -282,7 +282,10 @@ class _binding_SparkBaseConfig : public node::ObjectWrap {
             NODE_SET_PROTOTYPE_METHOD(tpl, "disable_voltage_compensation", disable_voltage_compensation);
             NODE_SET_PROTOTYPE_METHOD(tpl, "follow", follow);
             NODE_SET_PROTOTYPE_METHOD(tpl, "disable_follower_mode", disable_follower_mode);
+        }
 
+        rev::spark::SparkBaseConfig* get_config() {
+            return config;
         }
 };
 class _binding_SparkMax : public _binding_SparkBase {
@@ -330,13 +333,113 @@ class _binding_SparkMax : public _binding_SparkBase {
             }
         }
 
-        static void set(const FunctionCallbackInfo<Value>& args) {}
-        static void set_voltage(const FunctionCallbackInfo<Value>& args) {}
-        static void get(const FunctionCallbackInfo<Value>& args) {}
+        static void configure(const FunctionCallbackInfo<Value>& args) {
+            Isolate* isolate = args.GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            if(args.Length() != 3) {
+                throw_type_err(isolate, "SparkMax::configure requires three arguments!");
+            }
+            if(!args[1]->IsBoolean()) {
+                throw_type_err(isolate, "SparkMax::configure requires the second argument to be a boolean!");
+            }
+            if(!args[1]->IsBoolean()) {
+                throw_type_err(isolate, "SparkMax::configure requires the third argument to be a boolean!");
+            }
+
+            _binding_SparkMax* this_obj = ObjectWrap::Unwrap<_binding_SparkMax>(args.This());
+            rev::spark::SparkMax* spark_max = this_obj->spark_max;
+
+            // get config
+            _binding_SparkBaseConfig* arg0 = 
+                node::ObjectWrap::Unwrap<_binding_SparkBaseConfig>(
+                    args[0]->ToObject(context).ToLocalChecked()
+                );
+            rev::spark::SparkBaseConfig* cfg = arg0->get_config();
+
+            bool arg1 = args[1].As<Boolean>()->Value();
+            bool arg2 = args[2].As<Boolean>()->Value();
+
+            rev::spark::SparkBase::ResetMode reset_mode;
+            if(arg1) {
+                reset_mode = rev::spark::SparkBase::ResetMode::kNoResetSafeParameters;
+            } else {
+                reset_mode = rev::spark::SparkBase::ResetMode::kResetSafeParameters;
+            }
+
+            rev::spark::SparkBase::PersistMode persist_mode;
+            if(arg2) {
+                persist_mode = rev::spark::SparkBase::PersistMode::kNoPersistParameters;
+            } else {
+                persist_mode = rev::spark::SparkBase::PersistMode::kPersistParameters;
+            }
+
+            spark_max->Configure(*cfg, reset_mode, persist_mode);
+        }
+
+        // TODOs
+        static void get_alternate_encoder(const FunctionCallbackInfo<Value>& args) {}
+        static void get_absolute_encoder(const FunctionCallbackInfo<Value>& args) {}
+        static void get_forward_limit_switch(const FunctionCallbackInfo<Value>& args) {}
+        static void get_reverse_limit_switch(const FunctionCallbackInfo<Value>& args) {}
+
+        static void set(const FunctionCallbackInfo<Value>& args) {
+            Isolate* isolate = args.GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            if(args.Length() != 1) {
+                throw_type_err(isolate, "SparkMax::set requires one argument!");
+            }
+            if(!args[0]->IsNumber()) {
+                throw_type_err(isolate, "SparkMax::set requires the first argument to be a number!");
+            }
+
+            _binding_SparkMax* this_obj = ObjectWrap::Unwrap<_binding_SparkMax>(args.This());
+            rev::spark::SparkMax* spark_max = this_obj->spark_max;
+
+            double arg0 = args[0].As<Number>()->Value();
+
+            spark_max->Set(arg0);
+        }
+        static void set_voltage(const FunctionCallbackInfo<Value>& args) {
+            Isolate* isolate = args.GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            if(args.Length() != 1) {
+                throw_type_err(isolate, "SparkMax::set_voltage requires one argument!");
+            }
+            if(!args[0]->IsNumber()) {
+                throw_type_err(isolate, "SparkMax::set_voltage requires the first argument to be a number!");
+            }
+
+            _binding_SparkMax* this_obj = ObjectWrap::Unwrap<_binding_SparkMax>(args.This());
+            rev::spark::SparkMax* spark_max = this_obj->spark_max;
+
+            units::volt_t arg0 = units::volt_t(args[0].As<Number>()->Value());
+
+            spark_max->SetVoltage(arg0);
+        }
+        static void get(const FunctionCallbackInfo<Value>& args) {
+            Isolate* isolate = args.GetIsolate();
+            Local<Context> context = isolate->GetCurrentContext();
+
+            if(args.Length() != 0) {
+                throw_type_err(isolate, "SparkMax::get does not take arguments!");
+            }
+
+            _binding_SparkMax* this_obj = ObjectWrap::Unwrap<_binding_SparkMax>(args.This());
+            rev::spark::SparkMax* spark_max = this_obj->spark_max;
+
+            double val = spark_max->Get();
+            Local<Number> result = Number::New(isolate, val);
+
+            args.GetReturnValue().Set(result);
+        }
         static void set_inverted(const FunctionCallbackInfo<Value>& args) {}
         static void get_inverted(const FunctionCallbackInfo<Value>& args) {}
         static void disable(const FunctionCallbackInfo<Value>& args) {}
         static void stop_motor(const FunctionCallbackInfo<Value>& args) {}
+        // TODO: maybe configure_async
         static void get_encoder(const FunctionCallbackInfo<Value>& args) {}
         static void get_analog(const FunctionCallbackInfo<Value>& args) {}
         static void get_closed_loop_controller(const FunctionCallbackInfo<Value>& args) {}
